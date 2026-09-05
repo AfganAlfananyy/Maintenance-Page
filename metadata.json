@@ -1,0 +1,6 @@
+{
+  "name": "Website Sedang Dalam Pembuatan",
+  "description": "Website dalam tahap pembuatan dengan lampu sorot dramatis, mode malam interaktif, dan menu layar penuh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

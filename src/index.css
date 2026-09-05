@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* 
+  Hide default Windows/OS cursor completely across all elements 
+  so only the custom Minion character cursor is visible.
+*/
+*, *::before, *::after, html, body, #root, button, a, input, select, textarea, [role="button"], .cursor-pointer, .cursor-grab, .cursor-grabbing {
+  cursor: none !important;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  body {
+    font-family: 'Space Grotesk', -apple-system, sans-serif;
+    user-select: none;
+  }
+}
+
+.font-display {
+  font-family: 'Lilita One', 'Syne', cursive, sans-serif;
+}
+
+.font-brutal {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+}
+
+.font-mono-brutal {
+  font-family: 'Space Grotesk', monospace;
+}
