@@ -4,10 +4,13 @@ import { Instagram, ArrowUpRight } from 'lucide-react';
 import { AmbientBackground } from './components/AmbientBackground';
 import { HangingLamp } from './components/HangingLamp';
 import { VideoSpace } from './components/VideoSpace';
+import { WoodenNavbar } from './components/WoodenNavbar';
 import { MinionCursor } from './components/MinionCursor';
 
 export default function App() {
   const [isLightOn, setIsLightOn] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isNavbarHovered, setIsNavbarHovered] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [topConstraint, setTopConstraint] = useState(0);
   const [videoBounds, setVideoBounds] = useState<{ minX: number; maxX: number } | null>(null);
@@ -21,6 +24,10 @@ export default function App() {
 
   const toggleLight = () => {
     setIsLightOn((prev) => !prev);
+  };
+
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
   };
 
   // Dynamically calculate the upward drag limit so text can NEVER cross into the video area,
@@ -70,7 +77,7 @@ export default function App() {
 
   return (
     <main 
-      className="relative h-screen max-h-screen w-full flex flex-col justify-between items-center px-4 sm:px-8 py-3 sm:py-5 overflow-hidden select-none font-brutal bg-[#F3F3F3] text-[#1A1A1A]"
+      className="relative h-screen max-h-screen w-full flex flex-col items-center justify-center px-4 sm:px-8 py-2 overflow-hidden select-none font-brutal bg-[#F3F3F3] text-[#1A1A1A]"
     >
       {/* Custom Minion Cursor Character Follower (Windows default cursor hidden globally) */}
       <MinionCursor isDraggingText={isDraggingText} />
@@ -80,24 +87,30 @@ export default function App() {
 
       {/* Interactive Hanging Ceiling Lamp:
           - Bounded strictly within video left/right limits
-          - Freezes when lamp is OFF or when user is dragging text
+          - Freezes when lamp is OFF, when user is dragging text, or when hovering navbar
       */}
       <HangingLamp 
         isLightOn={isLightOn} 
         onToggle={toggleLight}
         isDraggingText={isDraggingText}
         videoBounds={videoBounds}
+        isNavbarHovered={isNavbarHovered}
       />
 
-      {/* Main Stage: Video on top, Slightly Tilted Draggable Hero Text Below */}
-      <div className="z-10 w-full max-w-4xl h-full flex flex-col items-center justify-center min-h-0 my-auto pt-6 sm:pt-10">
+      {/* Main Center Stage (Video, Hero Texts, and Instagram Button):
+          - Positioned comfortably BELOW the hanging ceiling lamp (pt-20 sm:pt-24 md:pt-28)
+          - Video and text receive direct illumination from the spotlight beam from above
+          - Completely unaffected by navbar open/close actions (never shifts up or down)
+          - z-10 so the spotlight light beam (z-25) shines directly in front of the video and texts
+      */}
+      <div className="z-10 w-full max-w-2xl flex flex-col items-center justify-center my-auto -translate-y-[20px] pt-20 sm:pt-24 md:pt-28 pb-16 sm:pb-20 px-2 sm:px-4">
         
         {/* Video Area: Infinite Loop & Continuous Autoplay with Real Sound */}
         <div 
           ref={videoContainerRef} 
-          className="w-full flex items-center justify-center shrink-0 min-h-0 mb-2 sm:mb-3"
+          className="w-full flex items-center justify-center shrink-0 min-h-0 mb-1.5 sm:mb-2"
         >
-          <VideoSpace />
+          <VideoSpace isMuted={isMuted} onMuteChange={setIsMuted} />
         </div>
 
         {/* Draggable Hero Text Container:
@@ -164,12 +177,12 @@ export default function App() {
           {/* Visit My Instagram Link */}
           <motion.a
             id="visit-instagram-link"
-            href="https://instagram.com/iradeviasari"
+            href="https://instagram.com/afganalfananyy"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="mt-4 px-5 py-2.5 font-mono-brutal text-xs sm:text-sm font-bold tracking-wider uppercase border-2 border-black bg-black text-[#FFE500] hover:bg-[#FFE500] hover:text-black shadow-[3px_3px_0px_0px_#000000] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center gap-2"
+            className="mt-4 px-5 py-2.5 font-mono-brutal text-xs sm:text-sm font-bold tracking-wider uppercase border-2 border-black bg-black text-[#FFE500] hover:bg-[#FFE500] hover:text-black shadow-[3px_3px_0px_0px_#000000] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center gap-2 cursor-pointer"
           >
             <Instagram className="w-4 h-4" />
             <span>VISIT MY INSTAGRAM</span>
@@ -178,6 +191,21 @@ export default function App() {
         </motion.div>
 
       </div>
+
+      {/* Bottom Fixed Wooden Navbar:
+          - Suspended flush at the bottom floor edge
+          - Completely independent of the center stage (no layout shift)
+          - Slides down out of screen when hidden, with a bottom unhide tab
+      */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none pb-0">
+        <div className="pointer-events-auto w-full max-w-lg sm:max-w-xl md:max-w-2xl flex justify-center">
+          <WoodenNavbar 
+            isMuted={isMuted} 
+            onToggleMute={toggleMute} 
+            onHoverChange={setIsNavbarHovered}
+          />
+        </div>
+      </footer>
     </main>
   );
 }

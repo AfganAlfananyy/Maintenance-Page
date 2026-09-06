@@ -1,77 +1,58 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Volume2, VolumeX } from 'lucide-react';
 
 interface VideoSpaceProps {
-  isMuted?: boolean;
+  isMuted: boolean;
   onMuteChange?: (muted: boolean) => void;
 }
 
 export const VideoSpace: React.FC<VideoSpaceProps> = ({
-  isMuted: externalMuted,
+  isMuted,
   onMuteChange,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(externalMuted ?? true);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
 
-  // Sync external prop if provided
+  // Sync isMuted prop to video element directly
   useEffect(() => {
-    if (externalMuted !== undefined && externalMuted !== isMuted) {
-      setIsMuted(externalMuted);
-      if (videoRef.current) {
-        videoRef.current.muted = externalMuted;
-        if (!externalMuted) {
-          videoRef.current.volume = 1.0;
-        }
-      }
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = isMuted;
+    if (!isMuted) {
+      video.volume = 1.0;
+      video.play().catch(() => {});
     }
-  }, [externalMuted]);
+  }, [isMuted]);
 
-  // Robust Autoplay & Audio Initialization
+  // Robust Autoplay and Continuous Loop
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Set maximum volume
     video.volume = 1.0;
+    video.muted = isMuted;
 
-    // First attempt: try playing unmuted
-    video.muted = false;
-    const initialPlay = video.play();
-
-    if (initialPlay !== undefined) {
-      initialPlay
-        .then(() => {
-          setIsMuted(false);
-          setIsPlaying(true);
-          onMuteChange?.(false);
-        })
-        .catch(() => {
-          // Browser Autoplay Policy blocked audio before user gesture:
-          // Immediately fall back to muted playback so visual video NEVER stops
+    // Start playback immediately
+    const startPlay = () => {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If browser blocks unmuted playback before user gesture,
+          // temporarily mute to ensure video visually plays without interruption
           video.muted = true;
-          setIsMuted(true);
           onMuteChange?.(true);
-          video.play().then(() => setIsPlaying(true)).catch(() => {});
+          video.play().catch(() => {});
         });
-    }
+      }
+    };
 
-    // Auto-unmute on first user gesture anywhere on the webpage
+    startPlay();
+
+    // Auto-unmute on first user gesture anywhere if user hasn't toggled yet
     const handleFirstGesture = () => {
-      setHasInteracted(true);
       if (videoRef.current) {
-        videoRef.current.muted = false;
+        videoRef.current.muted = isMuted;
         videoRef.current.volume = 1.0;
-        const p = videoRef.current.play();
-        if (p !== undefined) {
-          p.then(() => {
-            setIsMuted(false);
-            setIsPlaying(true);
-            onMuteChange?.(false);
-          }).catch(() => {});
-        }
+        videoRef.current.play().catch(() => {});
       }
     };
 
@@ -79,47 +60,29 @@ export const VideoSpace: React.FC<VideoSpaceProps> = ({
     window.addEventListener('touchstart', handleFirstGesture, { passive: true, once: true });
     window.addEventListener('keydown', handleFirstGesture, { passive: true, once: true });
 
-    // Ensure video resumes if tab becomes visible again
+    // Handle loop fallback and visibility
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    };
+
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && videoRef.current) {
-        if (videoRef.current.paused) {
-          videoRef.current.play().catch(() => {});
-        }
+      if (document.visibilityState === 'visible' && videoRef.current && videoRef.current.paused) {
+        videoRef.current.play().catch(() => {});
       }
     };
 
+    video.addEventListener('ended', handleEnded);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      video.removeEventListener('ended', handleEnded);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('click', handleFirstGesture);
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('keydown', handleFirstGesture);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
-
-  const handleToggleSound = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-
-    const nextMuted = !video.muted;
-    video.muted = nextMuted;
-    if (!nextMuted) {
-      video.volume = 1.0;
-      video.play().catch(() => {});
-    }
-    setIsMuted(nextMuted);
-    onMuteChange?.(nextMuted);
-  };
-
-  // Safe manual resume if user clicks directly on video area
-  const handleContainerClick = () => {
-    const video = videoRef.current;
-    if (video && video.paused) {
-      video.play().catch(() => {});
-    }
-  };
 
   return (
     <motion.div
@@ -128,12 +91,11 @@ export const VideoSpace: React.FC<VideoSpaceProps> = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="relative z-10 w-full flex items-center justify-center overflow-hidden min-h-0 select-none"
-      onClick={handleContainerClick}
     >
-      {/* Seamless Borderless Video Container */}
+      {/* Seamless Borderless Video Container matching Wooden Navbar Width */}
       <div 
         id="video-player-inner-frame"
-        className="relative w-full max-w-lg sm:max-w-xl md:max-w-2xl aspect-video max-h-[42vh] sm:max-h-[46vh] flex items-center justify-center overflow-hidden bg-transparent group"
+        className="relative w-full max-w-lg sm:max-w-xl md:max-w-2xl aspect-video max-h-[28vh] sm:max-h-[32vh] md:max-h-[34vh] flex items-center justify-center overflow-hidden bg-transparent"
       >
         <video
           ref={videoRef}
@@ -141,6 +103,7 @@ export const VideoSpace: React.FC<VideoSpaceProps> = ({
           autoPlay
           loop
           playsInline
+          muted={isMuted}
           controls={false}
           preload="auto"
           disablePictureInPicture
@@ -151,28 +114,6 @@ export const VideoSpace: React.FC<VideoSpaceProps> = ({
           <source src="/assets/hero.mp4" type="video/mp4" />
           <source src="/public/assets/hero.mp4" type="video/mp4" />
         </video>
-
-        {/* Audio Status & Interactive Sound Toggle Badge */}
-        <button
-          id="video-sound-toggle-btn"
-          type="button"
-          onClick={handleToggleSound}
-          className="absolute bottom-2.5 right-2.5 z-30 pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 bg-black/90 hover:bg-black text-[#FFE500] border-2 border-black rounded-lg shadow-[3px_3px_0px_0px_#FFE500] font-mono-brutal text-[10px] sm:text-xs font-black tracking-wider transition-all select-none"
-          title={isMuted ? 'Suara video dibisukan. Klik untuk mengaktifkan suara asli.' : 'Suara video asli aktif. Klik untuk membisukan.'}
-          aria-label={isMuted ? 'Aktifkan suara video' : 'Bisukan suara video'}
-        >
-          {isMuted ? (
-            <>
-              <VolumeX className="w-4 h-4 text-amber-400 animate-bounce" />
-              <span>[ 🔈 SUARA ASLI MATI // KLIK AKTIFKAN 🔊 ]</span>
-            </>
-          ) : (
-            <>
-              <Volume2 className="w-4 h-4 text-[#FFE500]" />
-              <span>[ 🔊 SUARA ASLI AKTIF // 100% ]</span>
-            </>
-          )}
-        </button>
       </div>
     </motion.div>
   );
