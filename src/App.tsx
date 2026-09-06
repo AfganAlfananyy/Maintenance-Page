@@ -77,7 +77,7 @@ export default function App() {
 
   return (
     <main 
-      className="relative h-screen max-h-screen w-full flex flex-col items-center justify-center px-4 sm:px-8 py-2 overflow-hidden select-none font-brutal bg-[#F3F3F3] text-[#1A1A1A]"
+      className="relative h-screen max-h-screen w-full flex flex-col items-center justify-center px-4 sm:px-8 py-2 overflow-hidden select-none font-brutal bg-[#f2f2f2] text-[#1A1A1A]"
     >
       {/* Custom Minion Cursor Character Follower (Windows default cursor hidden globally) */}
       <MinionCursor isDraggingText={isDraggingText} />
@@ -145,44 +145,106 @@ export default function App() {
           whileHover={{ scale: 1.015, rotate: -2.5 }}
           className="w-full flex flex-col items-center text-center shrink-0 max-w-2xl px-4 py-2 select-none pointer-events-auto"
         >
-          {/* Status / Drag Hint Badge */}
-          <div className="mb-2">
+          {/* Status / Drag Hint Badge with inviting idle drag animation */}
+          <motion.div 
+            className="mb-2"
+            animate={
+              isDraggingText
+                ? { scale: 1.05 }
+                : {
+                    x: [0, -6, 6, -4, 4, 0],
+                    rotate: [0, -2, 2, -1.5, 1.5, 0],
+                  }
+            }
+            transition={
+              isDraggingText
+                ? { duration: 0.2 }
+                : {
+                    repeat: Infinity,
+                    repeatDelay: 2.2,
+                    duration: 1.1,
+                    ease: 'easeInOut',
+                  }
+            }
+          >
             <span 
-              className="inline-flex items-center gap-1.5 px-3 py-1 font-mono-brutal text-[11px] sm:text-xs font-bold uppercase tracking-wider border-2 border-black bg-black text-[#FFE500] shadow-[2px_2px_0px_0px_#000000]"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1 font-mono-brutal text-[11px] sm:text-xs font-bold uppercase tracking-wider border-2 border-black bg-black text-[#FFE500] shadow-[2px_2px_0px_0px_#000000] cursor-grab active:cursor-grabbing"
             >
-              <span>[ ✦ TARIK SAYA // DRAG ME ]</span>
+              <span>[ TARIK SAYA ]</span>
             </span>
-          </div>
+          </motion.div>
 
-          {/* Large Yellow Brutalist Headline with Stylish Italic & Angle */}
-          <h1
+          {/* Large Yellow Brutalist Headline with Stylish Italic, Angle, and subtle drag invitation sway */}
+          <motion.h1
             id="main-headline"
-            className="font-display font-black text-3xl sm:text-5xl md:text-6xl tracking-tight leading-none uppercase text-[#FFE500] italic my-1 drop-shadow-[2px_2px_0px_#000000] sm:drop-shadow-[4px_4px_0px_#000000]"
+            animate={
+              isDraggingText
+                ? {}
+                : {
+                    x: [0, -3.5, 3.5, -2, 2, 0],
+                    rotate: [-2, -2.8, -1.2, -2.4, -2],
+                  }
+            }
+            transition={{
+              repeat: Infinity,
+              repeatDelay: 2.2,
+              duration: 1.1,
+              ease: 'easeInOut',
+            }}
+            className="font-display font-black text-3xl sm:text-5xl md:text-6xl tracking-tight leading-none uppercase text-[#FFE500] italic my-1 drop-shadow-[2px_2px_0px_#000000] sm:drop-shadow-[4px_4px_0px_#000000] cursor-grab active:cursor-grabbing"
             style={{
               WebkitTextStroke: '2px #000000',
               paintOrder: 'stroke fill',
             }}
           >
             SEDANG DIBANGUN.
-          </h1>
+          </motion.h1>
 
-          {/* Subtitle Description */}
-          <p 
+          {/* Subtitle Description with matching drag invitation wiggle */}
+          <motion.p 
             id="main-description"
-            className="font-brutal text-xs sm:text-sm md:text-base font-medium max-w-lg mt-1.5 text-neutral-700 leading-relaxed"
+            animate={
+              isDraggingText
+                ? {}
+                : {
+                    x: [0, -3, 3, -2, 2, 0],
+                    rotate: [0, -1, 1, -0.8, 0.8, 0],
+                  }
+            }
+            transition={{
+              repeat: Infinity,
+              repeatDelay: 2.2,
+              duration: 1.1,
+              ease: 'easeInOut',
+            }}
+            className="font-brutal text-xs sm:text-sm md:text-base font-medium max-w-lg mt-1.5 text-neutral-700 leading-relaxed cursor-grab active:cursor-grabbing"
           >
             Kami sedang menyusun dan mengembangkan website ini secara bertahap. Harap bersabar, pengalaman baru akan segera hadir.
-          </p>
+          </motion.p>
 
-          {/* Visit My Instagram Link */}
+          {/* Visit My Instagram Link with matching drag invitation wiggle */}
           <motion.a
             id="visit-instagram-link"
             href="https://instagram.com/afganalfananyy"
             target="_blank"
             rel="noopener noreferrer"
+            animate={
+              isDraggingText
+                ? {}
+                : {
+                    x: [0, -4, 4, -2.5, 2.5, 0],
+                    rotate: [0, -1.5, 1.5, -1, 1, 0],
+                  }
+            }
+            transition={{
+              repeat: Infinity,
+              repeatDelay: 2.2,
+              duration: 1.1,
+              ease: 'easeInOut',
+            }}
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="mt-4 px-5 py-2.5 font-mono-brutal text-xs sm:text-sm font-bold tracking-wider uppercase border-2 border-black bg-black text-[#FFE500] hover:bg-[#FFE500] hover:text-black shadow-[3px_3px_0px_0px_#000000] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center gap-2 cursor-pointer"
+            className="mt-4 px-5 py-2.5 font-mono-brutal text-xs sm:text-sm font-bold tracking-wider uppercase border-2 border-black bg-black text-[#FFE500] hover:bg-[#FFE500] hover:text-black shadow-[3px_3px_0px_0px_#000000] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center gap-2 cursor-pointer select-none"
           >
             <Instagram className="w-4 h-4" />
             <span>VISIT MY INSTAGRAM</span>
